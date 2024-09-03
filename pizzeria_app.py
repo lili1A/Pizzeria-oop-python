@@ -1,155 +1,121 @@
 from abc import ABC, abstractmethod
-from typing import List 
-
-# SRP: class Pizza is responsible for data aand operations connected with pizza
+from typing import List
 
 class Pizza:
     def __init__(self, name: str, base_price: float):
         self.name = name
         self.base_price = base_price
-        self.topping = []
-        
+        self.toppings = []
+
     def add_topping(self, topping: str, price: float):
-        self.topping.append((topping, price))
-        
+        self.toppings.append((topping, price))
+
     def calculate_price(self) -> float:
-        return self.base_price + sum(price for _, price in self.topping)
-    
-    def __str__(self):
-        toppings_str = ",".join([t[0] for t in self.topping]) or "No toppings"
-        return f"{self.name} (Base price: {self.base_price}$, Toppings: {toppings_str})- Total: {self.calculate_price}$"
-    
-# OCP: payment classes expand withoud changing the code 
+        return self.base_price + sum(price for _, price in self.toppings)
+
+class Order:
+    def __init__(self, pizza: Pizza, payment_method):
+        self.pizza = pizza
+        self.payment_method = payment_method
 
 class PaymentMethod(ABC):
     @abstractmethod
     def pay(self, amount: float):
         pass
 
-class CardPayment(PaymentMethod):
+class CreditCardPayment(PaymentMethod):
     def pay(self, amount: float):
-        print(f"Paid {amount} $ amount with card")
-        
-class Cashpyment(PaymentMethod):
+        print(f"Paid {amount} $ with credit card.")
+
+class CashPayment(PaymentMethod):
     def pay(self, amount: float):
-        print(f"Paid {amount} $ amount with cash")
-        
-# LSP: class order doesn't interfere in the working process of other classes
+        print(f"Paid {amount} $ in cash.")
 
-class Order:
-    def __init__(self, pizza: Pizza, payment_method: PaymentMethod):
-        self.pizza = pizza
-        self.payment_method = payment_method
-        
-    def process_order(self):
-        amount = self.pizza.calculate_price()
-        self.payment_method.pay(amount)
-        self.save_order_to_file()
-
-    def save_order_to_file(self):
-        with open("order.txt", "a") as file:
-            file.write(str(self.pizza) + "\n")
-        print(f"Order saved: {self.pizza}")
-        
-# ICP: user and admin interface 
-
-class PizzaShopInterface(ABC):
-    @abstractmethod
-    def choose_pizza(self):
-        pass
-    @abstractmethod
-    def create_custom_pizza(self):
-        pass
-    @abstractmethod
-    def place_order(self, pizza: Pizza, payment_method: PaymentMethod):
-        pass
-    
-class AdminShopInterface(ABC):
-    @abstractmethod
-    def get_sales_report(self):
-        pass
-    
-# user interface 
-
-class PizzaShop(PizzaShopInterface):
+class PizzaShop(ABC):
     def __init__(self):
         self.orders = []
-    
+
     def choose_pizza(self) -> Pizza:
-        print("Our pizzas:")
-        print("1. Margherita: 10$")
-        print("2. Pepperoni: 15$")
-        print("3. Hawaiian: 13$")
-        print("4. Meat: 17$")
-        print("5. Ham and mushrooms: 15$")
         
-        choice = int(input("Choose your pizza: "))
+        print("Available pizzas:")
+        print("1. Margherita - $10")
+        print("2. Pepperoni - $12")
+        print("3. Hawaiian - $11")
+
+        choice = int(input("Choose a pizza by number: "))
         if choice == 1:
-            return Pizza("Margherita", 10.0)
-        if choice == 2:
-            return Pizza("Pepperoni", 15.0)
-        if choice == 3:
-            return Pizza("hawaiian", 13.0)
-        if choice == 4:
-            return Pizza("Meat", 17.0)
-        if choice == 5:
-            return Pizza("Ham and mushrooms", 10.0)
+            return Pizza("Margherita", 10)
+        elif choice == 2:
+            return Pizza("Pepperoni", 12)
+        elif choice == 3:
+            return Pizza("Hawaiian", 11)
         else:
-            print("Incorrect input. Setting Margherita by default")
-            return Pizza("Margherita", 10.0)
-        
+            print("Invalid choice, defaulting to Margherita.")
+            return Pizza("Margherita", 10)
+
     def create_custom_pizza(self) -> Pizza:
         name = input("Enter the name for your pizza: ")
         base_price = 12
-        print("You can choose any 4 toppins for a base price of 12$")
+        print("You can choose any 4 toppings for a base price of 12$")
         custom_pizza = Pizza(name, base_price)
-        
-        # counter for limit of topping number 
-        topping_counter = 0
+
+        topping_count = 0
         max_toppings = 4
-        while topping_counter < max_toppings:
-            topping = input(f"Enter topping:
-                            1. sweet onion
-                            2. jalapeno
-                            3. chili
-                            4. pickle
-                            5. olives
-                            6. prosciutto
-                            or 'done' to finish): ")
+
+        while topping_count < max_toppings:
+            print("Choose between these toppings (enter number) OR type 'done' to finish:")
+            print("1. Sweet onion")
+            print("2. Jalapeno")
+            print("3. Chili")
+            print("4. Pickle")
+            print("5. Olives")
+            print("6. Prosciutto")
+            topping = input(f"Choice {topping_count + 1}:  ")
             if topping.lower() == 'done':
                 break
-            price = 0 # toppings do not increase the price 
-        custom_pizza.add_topping(topping, price)
-        topping_counter += 1
-        if topping_counter == max_toppings:
-            print("Maximum amounts of toppings has been reached")
-            return custom_pizza
-    
-# admin interface   
+            price = 0
+            
 
-class Admin(AdminShopInterface):
+        return custom_pizza
+
+    @abstractmethod
+    def place_order(self, pizza: Pizza, payment_method: PaymentMethod):
+        pass
+
+class MyPizzaShop(PizzaShop):
+    def place_order(self, pizza: Pizza, payment_method: PaymentMethod):
+        order = Order(pizza, payment_method)
+        self.orders.append(order)
+        amount = pizza.calculate_price()
+        payment_method.pay(amount)
+        print(f"Order placed for {pizza.name}. Total amount: {amount} $")
+
+class Admin:
     def __init__(self, orders: List[Order]):
         self.orders = orders
         
     def get_sales_report(self):
         total_pizzas = len(self.orders)
         total_revenue = sum(order.pizza.calculate_price() for order in self.orders)
-        profit_margin = 0.3 # 30% from revenue is profit
+        profit_margin = 0.3  # 30% от выручки - это прибыль
         total_profit = total_revenue * profit_margin
         
         print(f"Total pizzas sold: {total_pizzas}")
         print(f"Total revenue: {total_revenue} $")
         print(f"Total profit: {total_profit} $")
-        
-# main programm 
+
+
+# Основная программа
 if __name__ == "__main__":
-    shop = PizzaShop()
+    shop = MyPizzaShop()
     while True:
-        print("\n Welcome to the Pizzeria 'Roi'! ")
+        print("\nWelcome to the Pizzeria 'Roi'!")
         print("1. Choose a pizza")
         print("2. Create a custom pizza")
         print("3. Exit")
+
         choice = int(input("Choose from options above: "))
+
         if choice == 1:
             pizza = shop.choose_pizza()
         elif choice == 2:
@@ -159,22 +125,22 @@ if __name__ == "__main__":
         else:
             print("Invalid choice, try again")
             continue
-        
-        print("\n Choose payment method")
+
+        print("\nChoose payment method:")
         print("1. Card")
         print("2. Cash")
+
         payment_choice = int(input("Choose 1/2: "))
+
         if payment_choice == 1:
-            payment_method = CardPayment()
+            payment_method = CreditCardPayment()
         elif payment_choice == 2:
-            payment_method = Cashpyment()
-        else: 
+            payment_method = CashPayment()
+        else:
             print("Invalid choice, try again")
             continue
-        
-# admin mode 
-admin = Admin(shop.orders)
-admin.get_sales_report
-        
-        
-        
+
+        shop.place_order(pizza, payment_method)
+
+    admin = Admin(shop.orders)
+    admin.get_sales_report()
