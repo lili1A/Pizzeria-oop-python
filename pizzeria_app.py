@@ -68,3 +68,77 @@ class AdminShopInterface(ABC):
     @abstractmethod
     def get_sales_report(self):
         pass
+    
+# user interface 
+
+class PizzaShop(PizzaShopInterface):
+    def __init__(self):
+        self.orders = []
+    
+    def choose_pizza(self) -> Pizza:
+        print("Our pizzas:")
+        print("1. Margherita: 10$")
+        print("2. Pepperoni: 15$")
+        print("3. Hawaiian: 13$")
+        print("4. Meat: 17$")
+        print("5. Ham and mushrooms: 15$")
+        
+        choice = int(input("Choose your pizza: "))
+        if choice == 1:
+            return Pizza("Margherita", 10.0)
+        if choice == 2:
+            return Pizza("Pepperoni", 15.0)
+        if choice == 3:
+            return Pizza("hawaiian", 13.0)
+        if choice == 4:
+            return Pizza("Meat", 17.0)
+        if choice == 5:
+            return Pizza("Ham and mushrooms", 10.0)
+        else:
+            print("Incorrect input. Setting Margherita by default")
+            return Pizza("Margherita", 10.0)
+        
+    def create_custom_pizza(self) -> Pizza:
+        name = input("Enter the name for your pizza: ")
+        base_price = 12
+        print("You can choose any 4 toppins for a base price of 12$")
+        custom_pizza = Pizza(name, base_price)
+        
+        # counter for limit of topping number 
+        topping_counter = 0
+        max_toppings = 4
+        while topping_counter < max_toppings:
+            topping = input(f"Enter topping:
+                            1. sweet onion
+                            2. jalapeno
+                            3. chili
+                            4. pickle
+                            5. olives
+                            6. prosciutto
+                            or 'done' to finish): ")
+            if topping.lower() == 'done':
+                break
+            price = 0 # toppings do not increase the price 
+        custom_pizza.add_topping(topping, price)
+        topping_counter += 1
+        if topping_counter == max_toppings:
+            print("Maximum amounts of toppings has been reached")
+            return custom_pizza
+    
+# admin interface   
+
+class Admin(AdminShopInterface):
+    def __init__(self, orders: List[Order]):
+        self.orders = orders
+        
+    def get_sales_report(self):
+        total_pizzas = len(self.orders)
+        total_revenue = sum(order.pizza.calculate_price() for order in self.orders)
+        profit_margin = 0.3 # 30% from revenue is profit
+        total_profit = total_revenue * profit_margin
+        
+        print(f"Total pizzas sold: {total_pizzas}")
+        print(f"Total revenue: {total_revenue} $")
+        print(f"Total profit: {total_profit} $")
+        
+        
