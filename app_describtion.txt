@@ -1,0 +1,23 @@
+# Single Responsibility Principle - каждый класс выполняет свою задачу 
+# Open‐Closed Principle - классы могут расширяться, но не могут модифицироваться
+# Liskov Substitution Principle - специфические маленькие интерфейсы
+# Dependency Inversion Principle - модули высокого уровня не зависят от модулей низкого уровня
+
+# app structure explained below:
+
+# class Pizza - contains info abt pizza, toppings, pizza price calculation
+
+# payment method - with children: CashPayment and Cardpayment - interface and classes responsible for payment methods 
+
+# class Order - class responsible for making order, payment and saving order data to the file 
+
+# PizzaShopInterface & AdminIntetrface - interfaces for users and the pizzeria administrator
+
+# PizzaShopInterface - user inerface allowing to choose a pizza, create your own pizza, place the order
+
+# AdminIntetrface - admin interface allows to see the accounting data 
+
+# App structure:
+
+# User can choose a a pizza or make his own recipe, place the order
+# Admin can watch the data about revenue and profit
