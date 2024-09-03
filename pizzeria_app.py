@@ -30,7 +30,7 @@ class CardPayment(PaymentMethod):
     def pay(self, amount: float):
         print(f"Paid {amount} $ amount with card")
         
-class Cashayment(PaymentMethod):
+class Cashpyment(PaymentMethod):
     def pay(self, amount: float):
         print(f"Paid {amount} $ amount with cash")
         
@@ -140,5 +140,41 @@ class Admin(AdminShopInterface):
         print(f"Total pizzas sold: {total_pizzas}")
         print(f"Total revenue: {total_revenue} $")
         print(f"Total profit: {total_profit} $")
+        
+# main programm 
+if __name__ == "__main__":
+    shop = PizzaShop()
+    while True:
+        print("\n Welcome to the Pizzeria 'Roi'! ")
+        print("1. Choose a pizza")
+        print("2. Create a custom pizza")
+        print("3. Exit")
+        choice = int(input("Choose from options above: "))
+        if choice == 1:
+            pizza = shop.choose_pizza()
+        elif choice == 2:
+            pizza = shop.create_custom_pizza()
+        elif choice == 3:
+            break
+        else:
+            print("Invalid choice, try again")
+            continue
+        
+        print("\n Choose payment method")
+        print("1. Card")
+        print("2. Cash")
+        payment_choice = int(input("Choose 1/2: "))
+        if payment_choice == 1:
+            payment_method = CardPayment()
+        elif payment_choice == 2:
+            payment_method = Cashpyment()
+        else: 
+            print("Invalid choice, try again")
+            continue
+        
+# admin mode 
+admin = Admin(shop.orders)
+admin.get_sales_report
+        
         
         
